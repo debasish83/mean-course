@@ -1,0 +1,59 @@
+<!-- at the minimum we need a input for text and button to save the text -->
+<!-- now on save post we ahve to read the data and save it to mongo via node.js API call -->
+<!-- pass the method of the component class that will be executed here -->
+<!-- to figure out all html components and value bindings look into mdn resources -->
+<!-- this is one way to get the data, angular also support 2-way binding setting and reading the value -->
+<!-- oneway [value]="newPost" #postInput bidirectional [(ngmodel)]-->
+<!--
+<textarea row="6" [value]="newPost" #postInput></textarea>
+newPost will be received as HTMLTextArea and newPost.value has the string that user entered
+<button> (click)="onAddPost(newPost)">Save Post</button>
+angular material provide color="primary" and color="accent" is the contrasting color
+angular provides another way to handle and validate data from forms. Add a form html elemnt and
+use ngModel directive in a slightly different way
+bidirectional dataflow: <input matInput type=text [(ngModel)]="enteredTitle">
+form binding: <form> <mat-form-field> <input matInput type="text" name="title" ngModel> </mat-form-field>
+on a html form if there is a button with type="submit" that generates a submit event, on that submit event
+we would like to call onAddPost
+using #postForm="ngForm" angular give us access to postForm object
+-->
+
+<!-- template driven approach vs reactive approach to handle forms
+template driven let angular handle the form elements
+reactive driven let typescript handle the form elements
+-->
+<mat-card>
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <form [formGroup]="form" (submit)="onSavePost()" *ngIf="!isLoading">
+  <mat-form-field>
+    <input
+    matInput
+    type="text"
+    formControlName="title"
+    placeholder="Post Title">
+    <mat-error *ngIf="form.get('title')?.invalid">Please enter a post title </mat-error>
+  </mat-form-field>
+  <!-- add a file picker -->
+  <div>
+    <button mat-stroked-button type="button" (click)="filePicker.click()">Pick Image</button>
+    <!-- default file picker was ugly -->
+    <input type="file" #filePicker (change)="onImagePicked($event)">
+  </div>
+  <div class="image-preview" *ngIf="imagePreview !== '' && imagePreview">
+    <img [src]="imagePreview" [alt]="form.value.title">
+  </div>
+  <mat-form-field>
+    <textarea
+    matInput
+    row="6"
+    formControlName="content"
+    placeholder="Post Content">
+    </textarea>
+    <mat-error *ngIf="form.get('content')?.invalid">Please enter a post content</mat-error>
+  </mat-form-field>
+  <button
+  mat-raised-button
+  color="primary"
+  type="submit">Save Post</button>
+  </form>
+</mat-card>

@@ -1,0 +1,11 @@
+<!-- $event give access to all event - click, mouse, custom events like our event emitter -->
+<!-- we can bind posts that's defined inside the child component and bind it over here -->
+<app-header></app-header>
+<main>
+  <!-- we want these components to be loaded by angular router -->
+  <!--
+    <app-post-create></app-post-create>
+    <app-post-list></app-post-list>
+  -->
+  <router-outlet></router-outlet>
+</main>
