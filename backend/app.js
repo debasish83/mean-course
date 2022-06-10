@@ -7,8 +7,7 @@ const path = require('path');
 const postsRoutes = require('./routes/posts');
 
 const app = express();
-
-mongoose.connect('mongodb+srv://mean-admin:iFiaNlLfVrckIwct@mean-course.kynzo.mongodb.net/mean-course?retryWrites=true&w=majority')
+mongoose.connect(process.env.MONGODB_CREDENTIALS)
 .then(() => {
   console.log('Connected to database!');
 })
