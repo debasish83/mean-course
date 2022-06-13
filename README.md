@@ -69,3 +69,8 @@ ipaddress can change and we may need to update it with a new ip address
 we will use mongoose to define a schema and model for mongodb, mongoose add schema/model and uses mongo driver
 
 MongoDB credentials are available in github secrets, on local add it in environment variable $MONGODB_CREDENTIALS
+
+## Data Uploads
+Generally data - pdfs, xml, images, audio, videos, csvs, specialized file formats like genomics data we should create
+an appropriate identifier in the express/django app and save it in appropriate cloud storage like gcs/s3, biquery/redshift/snowflake
+Right now the images are uploaded to a local folder that's managed by express/django app
