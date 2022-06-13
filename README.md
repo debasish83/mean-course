@@ -55,11 +55,17 @@ call to cross origin http://localhost:3000/api/posts. It got fixed by adding spe
 Learn Node + Express from Scratch (for free!): https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs
 Creating a REST API with Node + Express (+ MongoDB): https://academind.com/learn/node-js/building-a-restful-api-with/
 
+Launch Express API using npm run start:server
+
+## File upload using Node APIs
+Multer Docs: https://github.com/expressjs/multer
+Tutorial on Angular Image Upload: https://academind.com/learn/angular/snippets/angular-image-upload-made-easy
+
 ## MongoDB setup
 Create a mongodb cluster on the cloud and get the username/password
-username: mean-admin
-password: iFiaNlLfVrckIwct
 We should save them in github secrets and not in the code
 We used our current ip address to connect with the cluster. If we are away from the project for a couple of days the
 ipaddress can change and we may need to update it with a new ip address
-we will use mongoose to define a schema and model for mongodb, mongoose add schema/model using mongo driver
+we will use mongoose to define a schema and model for mongodb, mongoose add schema/model and uses mongo driver
+
+MongoDB credentials are available in github secrets, on local add it in environment variable $MONGODB_CREDENTIALS
