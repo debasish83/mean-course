@@ -19,7 +19,7 @@ export class PostsService {
   //When the observable is invoked there is next(), error() and complete() callback hooks
   //We use it to manage http request and which returns the data from the API
   //Subject is a special type of passive subscriber
-  private postsUpdated = new Subject<Post[]>();
+  private postsUpdated = new Subject<{posts: Post[], postCount: number}>();
 
   // we can inject modules inside typescript classes
   // to navigate users we can use angular router
@@ -32,28 +32,34 @@ export class PostsService {
   // create a copy before we move the object
   // We don't want to use EventEmitter since that's used more with Input and Output decorator
   // We use a package called rxjs which is the equivalent of redux
-  getPosts() {
+  getPosts(postsPerPage: number, currentPage: number) {
     // this is where we would to get the posts from express backend
     // here we will send a http request and save the posts in our list
     // due to database _id Post[] data is not valid and we will use any
-    this.http.get<{message: string, posts: {title: String, content: String, _id: String, imagePath: String}[]}>('http://localhost:3000/api/posts')
+    const queryParams = `?pagesize=${postsPerPage}&page=${currentPage}`
+    this.http.get<{message: string,
+      posts: {title: String, content: String, _id: String, imagePath: String}[],
+      maxPosts: number}>('http://localhost:3000/api/posts' + queryParams)
     .pipe(map(postData => {
-      return postData.posts.map(post => {
-        console.log(post.imagePath);
-        return {
-          title: post.title,
-          content: post.content,
-          id: post._id,
-          imagePath: post.imagePath
-        };
-      });
-    }))
-    .subscribe((transformedPosts) => {
+      return {
+        posts: postData.posts.map(post => {
+          return {
+            title: post.title,
+            content: post.content,
+            id: post._id,
+            imagePath: post.imagePath
+          };
+        }),
+        maxPosts: postData.maxPosts
+      };
+    })
+    )
+    .subscribe((transformedPostData) => {
       // no need to duplicate, this data is coming from server
-      this.posts = transformedPosts;
+      this.posts = transformedPostData.posts;
       // we need to inform other part of our app about this update, sending a copy of the post so that
       // we don't edit the copy of the data that's in the service
-      this.postsUpdated.next([...this.posts]);
+      this.postsUpdated.next({posts: [...this.posts], postCount: transformedPostData.maxPosts});
     })
   }
 
@@ -67,15 +73,6 @@ export class PostsService {
     //from the service/redux store we can send the data
     this.http.post<{message:string, post: Post}>('http://localhost:3000/api/posts', postData)
     .subscribe(responseData => {
-      const post: Post = {
-        id: responseData.post.id,
-        title: title,
-        content: content,
-        imagePath: responseData.post.imagePath
-      }
-      this.posts.push(post);
-      //after we update the post we would like to emit a value that other component can access
-      this.postsUpdated.next([...this.posts])
       this.router.navigate(["/"]);
     })
   }
@@ -99,33 +96,13 @@ export class PostsService {
     this.http
     .put("http://localhost:3000/api/posts/" + id, postData)
     .subscribe(response => {
-      const updatedPosts = [...this.posts];
-      //search for the old post Id
-      const oldPostIndex = updatedPosts.findIndex(p => p.id === id);
-      const post: Post = {
-        id: id,
-        title: title,
-        content: content,
-        imagePath: ''//response.imagePath
-      }
-      updatedPosts[oldPostIndex] = post;
-      this.posts = updatedPosts;
-      //once the posts is updated, I tell my app about it by sending an event via postsUpdated
-      this.postsUpdated.next([...this.posts]);
       this.router.navigate(["/"]);
     })
   }
 
   deletePost(postId: String) {
     console.log('delete post ' + postId);
-    this.http.delete("http://localhost:3000/api/posts/" + postId)
-    .subscribe(() => {
-      //Instead of just logging it we need to update the post in our UI
-      //pull all the posts from angular UI and then filter the post that was deleted
-      const updatedPosts = this.posts.filter(post => post.id != postId);
-      this.posts = updatedPosts;
-      this.postsUpdated.next([...this.posts])
-    })
+    return this.http.delete("http://localhost:3000/api/posts/" + postId)
   }
 
   getPostUpdateListener() {

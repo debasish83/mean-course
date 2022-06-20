@@ -78,15 +78,39 @@ router.put("/:id", multer({storage: storage}).single("image"),
 
 // /api/posts can be reached from here and rest of the calls will go to void
 // in place of app.use we can use app.get and that will ensure only get requests show up over here
+
+// In the initial impl we are pulling all the documents from the backend
+// Now we will use query params to fetch appropriate number of posts
 router.get("", (req, res, next) => {
   //We want to show the real data, we can get all posts OR we can get a specific post based on a id
   //find will return all entry but we can configure it to narrow down result per id
-  Post.find().then(documents => {
+
+  // by default req.query.pagesize and req.query.page are strings, we need to convert it to numeric
+  const pageSize = +req.query.pagesize;
+  const currentPage = +req.query.page;
+  const postQuery = Post.find();
+  let fetchedPosts;
+  console.log('pageSize ' + pageSize + ' currentPage ' + currentPage);
+  // check if the API are setting these up
+  if (pageSize && currentPage) {
+    // MongoDB/Mongoose support the pagination operation using skip
+    // check if node.js mysql driver also support pagination operator
+    postQuery
+    .skip(pageSize * (currentPage - 1))
+    .limit(pageSize); // if the data is extremely large limit may get into issues
+  }
+  postQuery.then(documents => {
+    fetchedPosts = documents;
+    return Post.count();
+  })
+  .then(count => {
+    console.log('posts in mongo ' + count)
     res.status(200).json({
       message: 'Posts fetched successfully',
-      posts: documents
+      posts: fetchedPosts,
+      maxPosts: count
     })
-    console.log(documents)
+    console.log(fetchedPosts)
   })
 
   // Used for building UI
